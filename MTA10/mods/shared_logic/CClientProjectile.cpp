@@ -32,16 +32,13 @@ CClientProjectile::CClientProjectile ( class CClientManager* pManager, CProjecti
     m_pCreator = pCreator;
     m_pTarget = pTarget;
     m_weaponType = weaponType;
-    if ( pvecOrigin ) m_pvecOrigin = new CVector ( *pvecOrigin );
-    else m_pvecOrigin = NULL;
-    if ( pvecTarget ) m_pvecTarget = new CVector ( *pvecTarget );
-    else m_pvecTarget = NULL;
+    pProjectile->GetMoveSpeed ( &m_vecVelocity );
+    GetRotationDegrees ( m_vecRotation );
+    GetPosition ( m_vecPosition );
     m_fForce = fForce;
     m_bLocal = bLocal;
     m_llCreationTime = GetTickCount64_ ();
-
-    m_pInitiateData = NULL;
-    m_bInitiate = true;
+    m_usModel = m_pProjectile->GetModelIndex ( );
 
     m_pProjectileManager->AddToList ( this );
     m_bLinked = true;
@@ -81,10 +78,6 @@ CClientProjectile::~CClientProjectile ( void )
         }
     }
 
-    if ( m_pvecOrigin ) delete m_pvecOrigin;
-    if ( m_pvecTarget ) delete m_pvecTarget;
-
-    if ( m_pInitiateData ) delete m_pInitiateData;
 
     Unlink ();
 
@@ -120,23 +113,6 @@ void CClientProjectile::Unlink ( void )
 
 void CClientProjectile::DoPulse ( void )
 {
-    // We use initiate data to set values on creation (as it doesn't exist until a frame after our projectile hook)
-    if ( m_bInitiate )
-    {
-        if ( m_pInitiateData )
-        {
-            if ( m_pInitiateData->pvecPosition ) SetPosition ( *m_pInitiateData->pvecPosition );
-            if ( m_pInitiateData->pvecRotation ) SetRotationRadians ( *m_pInitiateData->pvecRotation );
-            if ( m_pInitiateData->pvecVelocity ) SetVelocity ( *m_pInitiateData->pvecVelocity );
-            if ( m_pInitiateData->usModel ) SetModel ( m_pInitiateData->usModel );
-        }
-
-        // Handle net sync and script event
-        g_pClientGame->ProjectileInitiateHandler ( this );
-
-        m_bInitiate = false;
-    }
-
     // Update our position/rotation if we're attached
     DoAttaching ();
 
@@ -147,35 +123,6 @@ void CClientProjectile::DoPulse ( void )
         m_bCorrected = m_pProjectile->CorrectPhysics ( );
     }
 }
-
-
-void CClientProjectile::Initiate ( CVector& vecPosition, CVector& vecRotation, CVector& vecVelocity, unsigned short usModel )
-{
-#ifdef MTA_DEBUG
-    if ( m_pInitiateData ) _asm int 3
-#endif
-
-    // Store our initiation data
-    m_pInitiateData = new CProjectileInitiateData;
-    m_pInitiateData->pvecPosition = new CVector ( vecPosition );
-
-    if ( vecRotation != CVector ( 0, 0, 0 ) )
-    {
-        m_pInitiateData->pvecRotation = new CVector ( vecRotation );
-    }
-    else
-    {
-        m_pInitiateData->pvecRotation = NULL;
-    }
-
-    if ( vecVelocity != CVector(0,0,0) ) 
-        m_pInitiateData->pvecVelocity = new CVector ( vecVelocity );
-    else 
-        m_pInitiateData->pvecVelocity = NULL;
-
-    m_pInitiateData->usModel = usModel;
-}
-
 
 void CClientProjectile::Destroy ( bool bBlow )
 {

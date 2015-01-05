@@ -27,25 +27,6 @@ class CClientProjectileManager;
 class CClientPed;
 class CClientVehicle;
 
-class CProjectileInitiateData
-{
-public:
-    inline          CProjectileInitiateData ( void )
-    {
-        pvecPosition = NULL; pvecRotation = NULL;
-        pvecVelocity = NULL; usModel = 0;
-    }
-    inline          ~CProjectileInitiateData ( void )
-    {
-        if ( pvecPosition ) delete pvecPosition;
-        if ( pvecRotation ) delete pvecRotation;
-        if ( pvecVelocity ) delete pvecVelocity;
-    }
-    CVector * pvecPosition;
-    CVector * pvecRotation;    
-    CVector * pvecVelocity;    
-    unsigned short usModel;
-};
 
 class CClientProjectile : public CClientEntity
 {
@@ -94,8 +75,6 @@ public:
     inline CClientEntity *              GetCreator              ( void )        { return m_pCreator; }
     inline CClientEntity *              GetTargetEntity         ( void )        { return m_pTarget; }
     inline eWeaponType                  GetWeaponType           ( void )        { return m_weaponType; }
-    inline CVector *                    GetOrigin               ( void )        { return m_pvecOrigin; }
-    inline CVector *                    GetTarget               ( void )        { return m_pvecTarget; }
     inline float                        GetForce                ( void )        { return m_fForce; }
     inline bool                         IsLocal                 ( void )        { return m_bLocal; }
     CClientEntity*                      GetSatchelAttachedTo    ( void );
@@ -110,14 +89,16 @@ protected:
     CClientEntityPtr                    m_pCreator;
     CClientEntityPtr                    m_pTarget;
     eWeaponType                         m_weaponType;
-    CVector *                           m_pvecOrigin;
-    CVector *                           m_pvecTarget;
     float                               m_fForce;
     bool                                m_bLocal;
     long long                           m_llCreationTime;
+    unsigned short                      m_usModel;
+    DWORD                               m_dwCounter;
 
-    bool                                m_bInitiate;
-    CProjectileInitiateData *           m_pInitiateData;
+    CVector                             m_vecPosition;
+    CVector                             m_vecRotation;
+    CVector                             m_vecVelocity;
+
     bool                                m_bCorrected;
 };
 

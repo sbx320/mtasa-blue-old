@@ -28,9 +28,9 @@ class CClientPed;
 class CClientVehicle;
 
 
-class CClientProjectile : public CClientEntity
+class CClientProjectile : public CClientStreamElement
 {
-    DECLARE_CLASS( CClientProjectile, CClientEntity )
+    DECLARE_CLASS ( CClientProjectile, CClientStreamElement )
     friend class CClientProjectileManager;
     friend class CClientPed;
     friend class CClientVehicle;
@@ -78,6 +78,13 @@ public:
     inline float                        GetForce                ( void )        { return m_fForce; }
     inline bool                         IsLocal                 ( void )        { return m_bLocal; }
     CClientEntity*                      GetSatchelAttachedTo    ( void );
+
+    void                                StreamIn ( bool bInstantly );
+    void                                StreamOut ( void );
+
+    void                                Create ( void );
+
+    void                                StreamedInPulse ( void );
     
 protected:
     CClientProjectileManager*           m_pProjectileManager;

@@ -137,6 +137,7 @@ private:
     CClientDisplayManager*              m_pDisplayManager;
     CClientVehicleManager*              m_pVehicleManager;
     CClientStreamer*                    m_pVehicleStreamer;
+    CClientStreamer*                    m_pProjectileStreamer;
     CClientPedManager*                  m_pPedManager;
     CClientWaterManager*                m_pWaterManager;
     CResourceManager*                   m_pResourceManager;

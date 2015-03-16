@@ -28,6 +28,7 @@ CClientProjectileManager::CClientProjectileManager ( CClientManager * pManager )
 
     m_bIsLocal = false;
     m_pCreator = NULL;
+    m_pStreamingIn = NULL;
 
     m_bCreating = false;
     m_pLastCreated = NULL;
@@ -52,11 +53,11 @@ void CClientProjectileManager::DoPulse ( void )
     {
         pProjectile = *iter;
 
-        // Is this projectile still active?
-        if ( pProjectile->IsActive () )
-        {
-            pProjectile->DoPulse ();
-        }
+        pProjectile->DoPulse ( );
+
+        // Is it streamed out and supposed to be gone?
+        if ( pProjectile->GetCounter ( ) <= 0 && !pProjectile->IsStreamedIn ( ) )
+            pElementDeleter->Delete ( pProjectile );
     }
 }
 
@@ -93,8 +94,11 @@ CClientProjectile* CClientProjectileManager::Get ( CEntitySAInterface * pProject
     list < CClientProjectile* > ::iterator iter = m_List.begin ();
     for ( ; iter != m_List.end () ; iter++ )
     {
-        if ( (*iter)->GetGameEntity ( )->GetInterface() == pProjectile )
+        CEntity* pProjectileSA = ( *iter )->GetGameEntity ( );
+        if ( pProjectileSA && pProjectileSA->GetInterface ( ) == pProjectile )
         {
+            // Make sure we're not getting a projectile from its entity while streaming out
+            if ( ( *iter )->StreamingOut ( ) ) return NULL;
             return (*iter);
         }
     }
